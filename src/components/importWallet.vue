@@ -217,7 +217,7 @@ export default {
         },
         handleChange(file, fileList) {
             if (fileList.length > 0) {
-                this.fileList = [fileList[fileList.length - 1]]  // 这一步，是 展示最后一次选择的csv文件
+                this.fileList = [fileList[fileList.length - 1]]  
                 this.fileName = fileList[fileList.length - 1].name.slice(0, 28)
             }
         },
@@ -341,12 +341,11 @@ export default {
             return accounts;
         },
         tableCellClassName({row, column, rowIndex, columnIndex}){
-            //利用单元格的 className 的回调方法，给行列索引赋值
             row.index = rowIndex;
             column.index = columnIndex;
         },
         cellClick(row, column, cell, event){
-            // console.log(row.index);  //选中行
+            // console.log(row.index);  
             let _this = this
             _this.radio = '1-' + row.index
             _this.mnemonicAccountSelected = true

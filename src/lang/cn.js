@@ -184,7 +184,8 @@ export default {
     "DOWNLOAD": "下载",
     "REFRESH": "刷新",
     "IMPORTKEYSTORE": "导入密钥库文件",
-    "OFFLINEVERSION": "离线版下载"
+    "OFFLINEVERSION": "离线版下载",
+    "COPYSUCCESS": "复制成功"
   },
   footer: {
     copy: '©Nebula AI Explorer 2021',

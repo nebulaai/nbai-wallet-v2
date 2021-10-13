@@ -80,7 +80,7 @@ export default {
       },
       copyText: function(text){
         let _this = this
-        let saveLang = _this.$store.getters.language == 'cn'?"复制成功":"success";
+        let saveLang = _this.$t('dashboard.COPYSUCCESS');
         var txtArea = document.createElement("textarea");
         txtArea.id = 'txt';
         txtArea.style.position = 'fixed';
@@ -113,8 +113,8 @@ export default {
         document.getElementById("er-pic").innerHTML = ""
         let qrcode = new QRCode('er-pic', {
           width: 160,
-          height: 160, // 高度
-          text: text, // 二维码内容
+          height: 160, 
+          text: text, 
           image: '',
           correctLevel: QRCode.CorrectLevel.L
         })

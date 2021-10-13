@@ -215,7 +215,7 @@ export default {
           this.ruleForm.to = display;
         }
         this.ruleForm.to = this.ruleForm.to.toLowerCase().indexOf('0x') == 0 ? this.ruleForm.to.trim() : '0x' + this.ruleForm.to.trim();
-        this.ruleForm.to_incorrect = !web3.utils.isAddress(this.ruleForm.to) ? true : false //检查指定的字符串是否是有效的以太坊地址
+        this.ruleForm.to_incorrect = !web3.utils.isAddress(this.ruleForm.to) ? true : false //Check whether the specified string is a valid Ethereum address
       },
       finishClose(){
         let _this = this
