@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-//路由懒加载
+//Route lazy loading
 const home = () => import("@/components/Home");
 const dashboard = () => import("@/views/dashboard/index"); 
 const main = () => import("@/views/dashboard/main/index");
@@ -12,7 +12,7 @@ const details = () => import("@/views/dashboard/details/index");
 Vue.use(Router)
 
 export default new Router({
-  // mode: 'history', // 后端支持可开
+  // mode: 'history', // Back end support can be opened
   mode: 'hash',
   routes: [
     {

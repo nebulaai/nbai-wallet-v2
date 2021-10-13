@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 // import Cookies from 'js-cookie'
-import elementEnLocale from 'element-ui/lib/locale/lang/en' // 英语
-import elementZhCNLocale from 'element-ui/lib/locale/lang/zh-CN' // 简体中文
+import elementEnLocale from 'element-ui/lib/locale/lang/en' // english
+import elementZhCNLocale from 'element-ui/lib/locale/lang/zh-CN' // chinese
 import enLocale from './en'
 import zhCNLocale from './cn'
 

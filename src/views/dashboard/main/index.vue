@@ -166,7 +166,7 @@ export default {
         accounts: sessionStorage.getItem('accoundList')?JSON.parse(sessionStorage.getItem('accoundList')):[],
         index: 1,
       
-        address: '0x3882E8B61C308ff6B3c252e8Cbcb93BC4E0F80F5'
+        address: ''
     }
   },
   methods: {

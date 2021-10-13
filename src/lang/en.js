@@ -185,7 +185,8 @@ export default {
       "DOWNLOAD": "Download",
       "REFRESH": "Refresh",
       "IMPORTKEYSTORE": "Import Keystore",
-      "OFFLINEVERSION": "Offline Version"
+      "OFFLINEVERSION": "Offline Version",
+      "COPYSUCCESS": "success"
   },
   footer: {
     copy: '©Nebula AI Explorer 2021',
