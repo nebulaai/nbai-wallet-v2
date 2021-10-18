@@ -40,7 +40,6 @@ export default {
     },
     mounted() {
         this.footer_style()
-        sessionStorage.removeItem('addrWeb')
     },
     methods: {
         getTotalStr(acc) {

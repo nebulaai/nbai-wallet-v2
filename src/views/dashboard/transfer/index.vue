@@ -1,5 +1,5 @@
 <template>
-  <div class="transfer_cont">
+  <div class="transfer_cont" v-loading="hashload">
     <el-form :model="ruleForm" ref="ruleForm" class="demo-ruleForm" @submit.native.prevent>
         <el-form-item :label="$t('dashboard.FROM')+'*'" prop="address_form" :class="{'err': ruleForm.address_form_tip}">
             <el-select v-model="ruleForm.address_form" placeholder="" @blur="selectFun(1, ruleForm.address_form)" @change="selectFun(1, ruleForm.address_form)">
@@ -8,7 +8,7 @@
                   :key="item.address"
                   :label="item.from"
                   :value="item.address">
-                  <span style="float: left" @click="addressFromClick(item.balance, item.password, item)">{{item.name}}&nbsp;-&nbsp;{{item.address | hidd}}&nbsp;-&nbsp;{{item.balance | number}} NBAI</span>
+                  <span style="float: left" @click="addressFromClick(item.balance, item.password, item)">{{item.name?item.name+' - ':''}}{{item.address | hidd}}&nbsp;-&nbsp;{{item.balance | number}} NBAI</span>
                 </el-option>
             </el-select>
             <p v-if="ruleForm.address_form_tip">Wallet Address is required</p>
@@ -26,7 +26,7 @@
                   :key="item.address"
                   :label="item.to"
                   :value="item.address">
-                  <span style="float: left" @click="addressToClick(item.address, item.display)">{{item.name}}&nbsp;-&nbsp;{{item.address | hidd}}&nbsp;-&nbsp;{{item.balance | number}} NBAI</span>
+                  <span style="float: left" @click="addressToClick(item.address, item.display)">{{item.name?item.name+' - ':''}}{{item.address | hidd}}&nbsp;-&nbsp;{{item.balance | number}} NBAI</span>
                 </el-option>
             </el-select>
             <p v-if="ruleForm.address_to_tip">To Wallet Address is required</p>
@@ -87,8 +87,8 @@
 </template>
 
 <script>
-let web3;
 let that;
+import NCWeb3 from "@/utils/web3";
 import transferPopup from '@/components/transferPopup'
 export default {
   name: 'Transfer',
@@ -139,22 +139,33 @@ export default {
         popupConfirm: false,
         password: '',
         txHash: '',
-        finishTransaction: false
+        finishTransaction: false,
+        timer: '',
+        hashload: false,
+        web3: new Web3(this.$root.networkUrl)
     }
+  },
+  computed: {
+      metaAddress() {
+          return this.$store.getters.metaAddress
+      }
   },
   watch: {
     'ruleForm.address_to': function() {
       let _this = this
       try{
 
-        // web3.eth.getCode("0xF72c727a8Ad004e4fEEeEe73dfA8D63D493373Db").then(console.log);
-        web3.eth.getCode(this.ruleForm.address_to).then(res => {
+        // _this.web3.eth.getCode("0xF72c727a8Ad004e4fEEeEe73dfA8D63D493373Db").then(console.log);
+        _this.web3.eth.getCode(this.ruleForm.address_to).then(res => {
           // console.log(res)
           _this.ruleForm.gaslimit = res.toLowerCase() == '0x' ? '21000' : '100000'
         })
       } catch (e) {
           // console.log(e);
       }
+    },
+    'metaAddress': function(){
+        this.init()
     }
   },
   methods: {
@@ -170,11 +181,15 @@ export default {
         _this.$refs[formName].validate((valid) => {
           if (valid) {
             if(_this.ruleForm.address_form){
-              web3.eth.getBalance(_this.ruleForm.address_form).then(balance => {
-                // _this.ruleForm.amount_balance = web3.utils.fromWei(balance, 'ether')
+              _this.web3.eth.getBalance(_this.ruleForm.address_form).then(balance => {
+                // _this.ruleForm.amount_balance = _this.web3.utils.fromWei(balance, 'ether')
                 _this.ruleForm.amount_balance = 0.000000000000000001 * balance
                 if(Number(_this.ruleForm.amount.trim()) > Number(_this.ruleForm.amount_balance)){
                   _this.ruleForm.amount_incorrect = true
+                  return false
+                }
+                if(_this.ruleForm.address_form == _this.metaAddress){
+                  _this.call(_this.ruleForm.address_form, _this.ruleForm.address_to)
                   return false
                 }
                 _this.popupConfirm = true
@@ -185,6 +200,49 @@ export default {
             return false;
           }
         });
+      },
+      call(from_address, to_address){
+        let _this = this
+        web3.eth.getTransactionCount(from_address, (err, txCount) => {    
+            const txObject = {
+                nonce: web3.utils.toHex(txCount),
+                from: from_address,
+                to: to_address,
+                gas: web3.utils.toHex(_this.ruleForm.gaslimit),
+                gasPrice: web3.utils.toHex(web3.utils.toWei(_this.ruleForm.gasprice + '', 'gwei')),
+                value: web3.utils.toHex(web3.utils.toWei(_this.ruleForm.amount, 'ether')),
+            };
+
+            web3.eth.sendTransaction(txObject)
+            .on('transactionHash', function(hash){
+                // console.info(hash)
+                _this.hashload = true
+            })
+            .on('receipt', function(receipt){
+                // console.info(receipt, receipt.transactionHash)
+                _this.checkTransaction(receipt.transactionHash)
+            })
+            .on('confirmation', function(confirmationNumber, receipt){
+                // console.info(confirmationNumber)
+                // console.info(receipt)
+            })
+            .on('error', console.error);
+        });
+      },
+      checkTransaction(txHash) {
+          let _this = this
+          web3.eth.getTransactionReceipt(txHash).then(
+              res => {
+                  console.log('checking ... ');
+                  if (!res) { return _this.timer = setTimeout(() => { _this.checkTransaction(txHash); }, 2000); }
+                  else {
+                    _this.hashload = false
+                    clearTimeout(_this.timer)
+                    _this.getTransferFinish(true, txHash)
+                  }
+              },
+              err => { console.error(err); }
+          );
       },
       resetForm(formName) {
         this.$refs[formName].resetFields();
@@ -211,19 +269,19 @@ export default {
       },
       addressToClick(address, display) {
         this.ruleForm.to = address
-        if (display.indexOf(' ') == -1) {
+        if (display && display.indexOf(' ') == -1) {
           this.ruleForm.to = display;
         }
         this.ruleForm.to = this.ruleForm.to.toLowerCase().indexOf('0x') == 0 ? this.ruleForm.to.trim() : '0x' + this.ruleForm.to.trim();
-        this.ruleForm.to_incorrect = !web3.utils.isAddress(this.ruleForm.to) ? true : false //Check whether the specified string is a valid Ethereum address
+        this.ruleForm.to_incorrect = !this.web3.utils.isAddress(this.ruleForm.to) ? true : false //Check whether the specified string is a valid Ethereum address
       },
       finishClose(){
         let _this = this
         let accCopy = JSON.parse(sessionStorage.getItem('accoundList'))
         let accLength = accCopy.length
         accCopy.map((item, i) => {
-            web3.eth.getBalance(item.address).then(balance => {
-                // item.balance = web3.utils.fromWei(balance, 'ether')
+            _this.web3.eth.getBalance(item.address).then(balance => {
+                // item.balance = _this.web3.utils.fromWei(balance, 'ether')
                 item.balance = 0.000000000000000001 * balance
                 let iLength = i + 1
                 if(iLength == accLength){
@@ -234,31 +292,44 @@ export default {
                 }
             });
         })
+      },
+      init(){
+        let _this = this
+        _this.ruleForm.address_form = _this.$route.params.address?_this.$route.params.address:_this.metaAddress
+        _this.addressAll = []
+        if(_this.metaAddress){
+          _this.web3.eth.getBalance(_this.metaAddress).then(balance => {
+            let add = {
+              address: _this.metaAddress,
+              balance: 0.000000000000000001 * balance
+            }
+            _this.addressAll.push(add)
+            _this.ruleForm.amount_balance = add.balance
+          });
+        }
+        if(sessionStorage.getItem('accoundList')){
+          let detaAll = JSON.parse(sessionStorage.getItem('accoundList'))
+          detaAll.map(account => {
+            if(!account.balance) account.balance = 0
+            account.from = `${account.name} - ${account.address.substring(0, 4)}...${account.address.substring(account.address.length - 4)} - ${String(account.balance).replace(/^(.*\..{18}).*$/, "$1")} NBAI`
+            account.to = `${account.name} - ${account.address.substring(0, 4)}...${account.address.substring(account.address.length - 4)} - ${String(account.balance).replace(/^(.*\..{18}).*$/, "$1")} NBAI`
+            account.display = account.name + '  ' + `${account.address.substring(0, 4)}...${account.address.substring(account.address.length - 4)}` + '  ' + Number(account.balance) + ' NBAI'
+
+            if(_this.$route.params.address && _this.$route.params.address == account.address){
+              _this.addressFromClick(account.balance, account.password, account)
+            }
+
+            _this.addressAll.push(account)
+          })
+        } 
       }
   },
   mounted() {
     let _this = this
     that = _this
-    web3 = new Web3(_this.$root.networkUrl);
-    web3.setProvider(_this.$root.networkUrl);
+    _this.web3.setProvider(_this.$root.networkUrl);
     _this.$store.dispatch("setRouterMenu", 2);
-    if(_this.$route.params.address){
-      _this.ruleForm.address_form = _this.$route.params.address
-    }
-    if(sessionStorage.getItem('accoundList')){
-      _this.addressAll = JSON.parse(sessionStorage.getItem('accoundList'))
-      _this.addressAll.map(account => {
-        if(!account.balance) account.balance = 0
-        account.from = `${account.name} - ${account.address.substring(0, 4)}...${account.address.substring(account.address.length - 4)} - ${String(account.balance).replace(/^(.*\..{18}).*$/, "$1")} NBAI`
-        account.to = `${account.name} - ${account.address.substring(0, 4)}...${account.address.substring(account.address.length - 4)} - ${String(account.balance).replace(/^(.*\..{18}).*$/, "$1")} NBAI`
-        account.display = account.name + '  ' + `${account.address.substring(0, 4)}...${account.address.substring(account.address.length - 4)}` + '  ' + Number(account.balance) + ' NBAI'
-
-        if(_this.$route.params.address && _this.$route.params.address == account.address){
-          _this.addressFromClick(account.balance, account.password, account)
-        }
-      })
-    } 
-
+    _this.init()
   },
   filters: {
     hidd(val) {

@@ -164,7 +164,12 @@ export default {
         fn() {
             let _this = this
             ethereum.on("accountsChanged", function(accounts) {
-                console.log('account:', accounts[0]);  //Once the account is switched, it will be executed here
+                if(_this.$store.getters.metaAddress){
+                    _this.addr = accounts[0]
+                    _this.walletInfo()
+                    _this.$store.dispatch('setMetaAddress', accounts[0])
+                }
+                // console.log('account:', accounts[0]);  //Once the account is switched, it will be executed here
             });
             ethereum.on("networkChanged", function(accounts) {
                 _this.walletInfo()
@@ -172,12 +177,12 @@ export default {
         },
         signOutFun() {
             this.addr = ''
-            sessionStorage.removeItem('addrWeb')
+            this.$store.dispatch('setMetaAddress', '')
         },
     },
     mounted() {
         let _this = this
-        if(sessionStorage.getItem('addrWeb')){
+        if(_this.$store.getters.metaAddress){
             _this.signFun()
         }
         _this.fn()

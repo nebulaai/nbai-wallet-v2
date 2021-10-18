@@ -4,6 +4,7 @@ const app = {
     state: {
         language: localStorage.getItem('language_market') || 'en',
         routerMenu: localStorage.getItem('routerMenu') || 0,
+        metaAddress: sessionStorage.getItem('metaAddress') || ''
     },
     mutations: {
         SET_LANGUAGE: (state, language) => {
@@ -15,6 +16,10 @@ const app = {
             state.routerMenu = routerMenu
             localStorage.setItem('routerMenu', routerMenu)
         },
+        SET_METAADDRESS: (state, metaAddress) => {
+            state.metaAddress = metaAddress
+            sessionStorage.setItem('metaAddress', metaAddress)
+        },
 
     },
     actions: {
@@ -24,6 +29,9 @@ const app = {
         setRouterMenu({commit}, routerMenu) {
             commit('SET_ROUTERMENU', routerMenu)
         },
+        setMetaAddress({commit}, metaAddress) {
+            commit('SET_METAADDRESS', metaAddress)
+        }
     }
 }
 
