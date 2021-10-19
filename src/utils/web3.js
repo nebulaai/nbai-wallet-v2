@@ -1,4 +1,5 @@
 //web3.js
+import store from '../store'
 const contractAddress = ''
 const contractABI=[]
 var contract=null;
@@ -23,8 +24,7 @@ function Init(callback){
       if(!accounts){
         return false
       }
-      sessionStorage.removeItem('addrWeb')
-      sessionStorage.setItem('addrWeb', accounts[0])
+      store.dispatch('setMetaAddress', accounts[0])
       callback(accounts[0])
     });
   }

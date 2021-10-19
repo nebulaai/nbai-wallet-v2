@@ -189,20 +189,16 @@ export default {
         handleClick(tab, event) {
             // console.log(tab, event);
         },
-        // 文件上传
         uploadFile(params) {
             let _this = this
             _this.upload_file = params.file;
             
-            // 读取并解析csv文件,读取为二进制
             var reader = new FileReader();
             reader.readAsText(_this.upload_file, 'utf-8');
             reader.onload = function (evt) {
                 var str = reader.result;
                 var rows = str.split('\n'); 
-                // if(!str.replace(/^\s+|\s+$/g,'')){
-                //     console.log('csv文件为空')
-                // }
+                // if(!str.replace(/^\s+|\s+$/g,'')){}
                 _this.keyStore = JSON.parse(JSON.stringify(str.toLowerCase()))                
             }   
 
