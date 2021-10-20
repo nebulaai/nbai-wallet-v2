@@ -16,6 +16,10 @@ Run `npm run dev` for a dev server. Navigate to `http://localhost:8080/`. The ap
 
 Run `npm run build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
+## Node version
+
+v12.14.1
+
 ## Reference documents
 
 - [vue](https://vuejs.bootcss.com/v2/guide/)：Vue is a progressive framework for building user interfaces.
