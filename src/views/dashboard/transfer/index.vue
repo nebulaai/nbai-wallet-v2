@@ -300,6 +300,7 @@ export default {
         if(_this.metaAddress){
           _this.web3.eth.getBalance(_this.metaAddress).then(balance => {
             let add = {
+              name: 'MetaMask',
               address: _this.metaAddress,
               balance: 0.000000000000000001 * balance
             }
