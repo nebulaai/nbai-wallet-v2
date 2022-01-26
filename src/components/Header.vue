@@ -171,7 +171,7 @@ export default {
                 }
                 // console.log('account:', accounts[0]);  //Once the account is switched, it will be executed here
             });
-            ethereum.on("networkChanged", function(accounts) {
+            ethereum.on("chainChanged", function(accounts) {
                 _this.walletInfo()
             });
         },
