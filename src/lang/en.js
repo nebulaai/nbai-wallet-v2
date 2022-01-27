@@ -189,7 +189,7 @@ export default {
       "COPYSUCCESS": "success"
   },
   footer: {
-    copy: '©Nebula AI Explorer 2021',
+    copy: '©Nebula AI Explorer 2022',
     privacy: 'Privacy',
   }
   

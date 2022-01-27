@@ -188,7 +188,7 @@ export default {
     "COPYSUCCESS": "复制成功"
   },
   footer: {
-    copy: '©Nebula AI Explorer 2021',
+    copy: '©Nebula AI Explorer 2022',
     privacy: 'Privacy',
   }
   
